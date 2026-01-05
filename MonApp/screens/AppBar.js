@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native'; 
+import { AuthContext } from "../context/AuthContext"; 
 
 export default function AppBar() {
   return (

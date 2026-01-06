@@ -1,50 +1,45 @@
-import { useState, useEffect } from "react"; 
-import { View, Text, Button, FlatList, TouchableOpacity } from "react-native"; 
+import { View, Text, FlatList, TouchableOpacity } from "react-native"; 
+import { useSelector, useDispatch } from "react-redux"; 
+import { useEffect } from "react"; 
+import { addTodo } from "../store/todosSlice"; 
+import AppBar from "./AppBar"; 
  
 export default function TodoListScreen({ navigation }) { 
- const [todos, setTodos] = useState([]); 
- const [loading, setLoading] = useState(true); 
+ const todos = useSelector(state => state.todos); 
+ const dispatch = useDispatch(); 
  
  useEffect(() => { 
-   console.log("Chargement des tâches..."); 
+   // On n'ajoute les données de test QUE si la liste est vide
+   // Cela évite les doublons d'ID au rechargement
+   if (addTodo && todos.length === 0) { 
+     dispatch(addTodo({ id: 1, title: "Faire les courses" })); 
+     dispatch(addTodo({ id: 2, title: "Sortir le chien" })); 
+     dispatch(addTodo({ id: 3, title: "Coder une app RN" })); 
+   }
+ }, [dispatch, todos.length]); // On surveille la taille de la liste
  
-   setTimeout(() => { 
-     setTodos([ 
-       { id: 1, title: "Faire les courses" }, 
-       { id: 2, title: "Sortir le chien" }, 
-       { id: 3, title: "Coder une app RN" }, 
-     ]); 
-     setLoading(false); 
-   }, 1000); 
- }, []); // [] => exécute une seule fois au montage 
+ return ( 
+    <View style={{ flex: 1 }}>
+      <AppBar title="Ma Liste" /> 
  
- if (loading) { 
-   return ( 
-     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}> 
-       <Text style={{ fontSize: 20 }}>Chargement...</Text> 
-     </View> 
-   ); 
- } 
- 
- return (  <View style={{ flex: 1, padding: 20 }}> 
-     <Text style={{ fontSize: 24, marginBottom: 10 }}>Mes tâches</Text> 
- 
-     <FlatList 
-       data={todos} 
-       keyExtractor={(i) => i.id.toString()} 
+      <FlatList
+       data={todos}
+       keyExtractor={(item, index) => item.id.toString() + index} // Sécurité supplémentaire
        renderItem={({ item }) => ( 
-         <TouchableOpacity 
-           onPress={() => 
-            navigation.navigate("Details", {
-                todoId: item.id,
-                title: item.title,
-              })
-           } 
-         > 
-           <Text style={{ padding: 10, fontSize: 18 }}>{item.title}</Text> 
-         </TouchableOpacity> 
+          <TouchableOpacity 
+             onPress={() => navigation.navigate("Détails", item)} 
+             style={{
+               padding: 20,
+               borderBottomWidth: 1,
+               borderBottomColor: "#ccc",
+             }}
+           > 
+             <Text style={{ fontSize: 18 }}>
+               {item.title} 
+             </Text>
+          </TouchableOpacity> 
        )} 
      /> 
-   </View> 
+    </View>
  ); 
 }
